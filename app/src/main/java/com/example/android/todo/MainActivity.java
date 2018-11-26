@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity  implements LoaderManager.Lo
                         contentValues.put(TaskContract.TaskEntry.COLUMN_ISCOMPLETED,mDefaultCompletedValue);
                         Uri uri = getContentResolver().insert(TaskContract.TaskEntry.CONTENT_URI, contentValues);
                         if(uri != null) {
-                            Toast.makeText(getBaseContext(), uri.toString(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getBaseContext(), "Task is SucessFully Added", Toast.LENGTH_LONG).show();
                         }
                         getSupportLoaderManager().restartLoader(TASK_LOADER_ID, null, cursorLoaderCallbacks);
 
