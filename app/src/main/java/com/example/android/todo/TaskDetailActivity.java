@@ -233,43 +233,5 @@ public class TaskDetailActivity extends AppCompatActivity  implements LoaderMana
 
     }
 
-//    public void setAlaram(Context context,Class<?> cls,int mHour,int mMinute,String status){
-//
-////        Intent myIntent=new Intent(this,NotifyService.class);
-////        AlarmManager alarmManager=(AlarmManager)getSystemService(ALARM_SERVICE);
-////        PendingIntent pendingIntent=PendingIntent.getService(this,0,myIntent,0);
-////        Calendar calendar=Calendar.getInstance();
-////        calendar.set(Calendar.SECOND,0);
-////        calendar.set(Calendar.MINUTE,mMinute);
-////        calendar.set(Calendar.HOUR,mHour);
-////
-////
-////        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),1000*60*60*24,pendingIntent);
-////
-////          Toast.makeText(TaskDetailActivity.this,"Remineder start",Toast.LENGTH_LONG).show();
-//
-//
-//        Calendar calendar = Calendar.getInstance();
-//        Calendar setcalendar = Calendar.getInstance();
-//        setcalendar.set(Calendar.HOUR_OF_DAY, mHour);
-//        setcalendar.set(Calendar.MINUTE, mMinute);
-//        setcalendar.set(Calendar.SECOND, 0);
-//        if(setcalendar.before(calendar))
-//            setcalendar.add(Calendar.DATE,1);
-//        ComponentName receiver = new ComponentName(context, cls);
-//        PackageManager pm = context.getPackageManager();
-//        pm.setComponentEnabledSetting(receiver,
-//                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-//                PackageManager.DONT_KILL_APP);
-//
-//        Intent intent1 = new Intent(context, cls);
-//
-//        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
-//                DAILY_REMINDER_REQUEST_CODE, intent1,
-//                PendingIntent.FLAG_UPDATE_CURRENT);
-//        AlarmManager am = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-//        am.setInexactRepeating(AlarmManager.RTC_WAKEUP, setcalendar.getTimeInMillis(),
-//                AlarmManager.INTERVAL_DAY, pendingIntent);
-//
-//    }
+
 }

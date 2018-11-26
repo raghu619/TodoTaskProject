@@ -141,7 +141,7 @@ public class TaskContentProvider extends ContentProvider {
         }
 
         if (tasksDeleted != 0) {
-            // A task was deleted, set notification
+
             getContext().getContentResolver().notifyChange(uri, null);
         }
         return tasksDeleted;
