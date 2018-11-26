@@ -1,14 +1,10 @@
 package com.example.android.todo;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -27,9 +23,11 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.android.todo.adapters.TaskCommentAdapter;
-import com.example.android.todo.adapters.TaskCustomAdapter;
 import com.example.android.todo.data.CommentsDbHelper;
 import com.example.android.todo.data.TaskContract;
+import com.example.android.todo.reminderservice.AlarmReceiver;
+import com.example.android.todo.reminderservice.LocalData;
+import com.example.android.todo.reminderservice.NotificationScheduler;
 
 import java.util.Calendar;
 
@@ -44,9 +42,12 @@ public class TaskDetailActivity extends AppCompatActivity  implements LoaderMana
     private Context mContext;
     private int CommentId;
     private Cursor mCursor;
+    LocalData localData;
     private TaskCommentAdapter mAdapter;
     private static final int TASK_LOADER_ID = 1;
+    private static final int DAILY_REMINDER_REQUEST_CODE=2;
     private int mHour,mMinute;
+    private  String mtitle;
     final LoaderManager.LoaderCallbacks<Cursor> cursorLoaderCallbacks=this;
 
 
@@ -54,8 +55,12 @@ public class TaskDetailActivity extends AppCompatActivity  implements LoaderMana
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_detail);
+        localData = new LocalData(getApplicationContext());
         mTextView=findViewById(R.id.addComment);
         mTimePickerView=findViewById(R.id.timepickerview);
+
+        mHour = localData.get_hour();
+        mMinute = localData.get_min();
 
 
 
@@ -64,9 +69,9 @@ public class TaskDetailActivity extends AppCompatActivity  implements LoaderMana
         mContext=this;
 
 
-        String title=mBundle.getString("title");
+         mtitle=mBundle.getString("title");
         CommentId=mBundle.getInt("id");
-        setTitle(title);
+        setTitle(mtitle);
 
         mRecyclerView = findViewById(R.id.recyclerCommentViewTasks);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -87,26 +92,29 @@ public class TaskDetailActivity extends AppCompatActivity  implements LoaderMana
             public void onClick(View view) {
 
                 final Calendar c=Calendar.getInstance();
-                mHour=c.get(Calendar.HOUR_OF_DAY);
-                mMinute=c.get(Calendar.MINUTE);
+
                 TimePickerDialog timePickerDialog=new TimePickerDialog(TaskDetailActivity.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int i, int i1) {
-                        String status="AM";
-                        if(i>11){
-                            status="PM";
-                        }
-//                        int hour_of_12_hour_format;
+//                        String status="AM";
 //                        if(i>11){
-//                            hour_of_12_hour_format=i-12;
-//
-//
+//                            status="PM";
 //                        }
+//                   }
+//
+//                        int hour=timePicker.getHour();
+//                        int minutes=timePicker.getMinute();
+//
+//                        setAlaram(hour,minutes,status);
 
-                        int hour=timePicker.getHour();
-                        int minutes=timePicker.getMinute();
+                        localData.set_hour(i);
+                        localData.set_min(i1);
+                        localData.setTask(mtitle);
 
-                        setAlaram(hour,minutes,status);
+
+                        NotificationScheduler.setReminder(TaskDetailActivity.this, AlarmReceiver.class, localData.get_hour(), localData.get_min());
+
+
 
 
 
@@ -134,7 +142,7 @@ public class TaskDetailActivity extends AppCompatActivity  implements LoaderMana
 
 
         LayoutInflater layoutInflaterAndroid = LayoutInflater.from(this);
-        View mView = layoutInflaterAndroid.inflate(R.layout.task_input_dialog, null);
+        View mView = layoutInflaterAndroid.inflate(R.layout.comment_input_dialog, null);
         AlertDialog.Builder alertDialogBuilderUserInput = new AlertDialog.Builder(this);
         alertDialogBuilderUserInput.setView(mView);
         final EditText userInputDialogEditText = (EditText) mView.findViewById(R.id.userInputDialog);
@@ -156,7 +164,7 @@ public class TaskDetailActivity extends AppCompatActivity  implements LoaderMana
 
                        long value= mCommentsDbHelper.getWritableDatabase().insert(TaskContract.CommentsEntry.TABLE_NAME,null,contentValues);
                         if(value != 0) {
-                            Toast.makeText(getBaseContext(), String.valueOf(value), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getBaseContext(), "Added Comment", Toast.LENGTH_LONG).show();
 
                         }
                         getSupportLoaderManager().restartLoader(TASK_LOADER_ID, null, cursorLoaderCallbacks);
@@ -225,23 +233,43 @@ public class TaskDetailActivity extends AppCompatActivity  implements LoaderMana
 
     }
 
-    public void setAlaram(int mHour,int mMinute,String status){
-
-        Intent myIntent=new Intent(this,NotifyService.class);
-        AlarmManager alarmManager=(AlarmManager)getSystemService(ALARM_SERVICE);
-        PendingIntent pendingIntent=PendingIntent.getService(this,0,myIntent,0);
-        Calendar calendar=Calendar.getInstance();
-        calendar.set(Calendar.SECOND,0);
-        calendar.set(Calendar.MINUTE,mMinute);
-        calendar.set(Calendar.HOUR,mHour);
-        if(status.equals("AM"))
-         calendar.set(Calendar.AM_PM,Calendar.AM);
-        else
-            calendar.set(Calendar.AM_PM,Calendar.PM);
-
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),1000*60*60*24,pendingIntent);
-
-          Toast.makeText(TaskDetailActivity.this,"Remineder start",Toast.LENGTH_LONG).show();
-
-    }
+//    public void setAlaram(Context context,Class<?> cls,int mHour,int mMinute,String status){
+//
+////        Intent myIntent=new Intent(this,NotifyService.class);
+////        AlarmManager alarmManager=(AlarmManager)getSystemService(ALARM_SERVICE);
+////        PendingIntent pendingIntent=PendingIntent.getService(this,0,myIntent,0);
+////        Calendar calendar=Calendar.getInstance();
+////        calendar.set(Calendar.SECOND,0);
+////        calendar.set(Calendar.MINUTE,mMinute);
+////        calendar.set(Calendar.HOUR,mHour);
+////
+////
+////        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),1000*60*60*24,pendingIntent);
+////
+////          Toast.makeText(TaskDetailActivity.this,"Remineder start",Toast.LENGTH_LONG).show();
+//
+//
+//        Calendar calendar = Calendar.getInstance();
+//        Calendar setcalendar = Calendar.getInstance();
+//        setcalendar.set(Calendar.HOUR_OF_DAY, mHour);
+//        setcalendar.set(Calendar.MINUTE, mMinute);
+//        setcalendar.set(Calendar.SECOND, 0);
+//        if(setcalendar.before(calendar))
+//            setcalendar.add(Calendar.DATE,1);
+//        ComponentName receiver = new ComponentName(context, cls);
+//        PackageManager pm = context.getPackageManager();
+//        pm.setComponentEnabledSetting(receiver,
+//                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+//                PackageManager.DONT_KILL_APP);
+//
+//        Intent intent1 = new Intent(context, cls);
+//
+//        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
+//                DAILY_REMINDER_REQUEST_CODE, intent1,
+//                PendingIntent.FLAG_UPDATE_CURRENT);
+//        AlarmManager am = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+//        am.setInexactRepeating(AlarmManager.RTC_WAKEUP, setcalendar.getTimeInMillis(),
+//                AlarmManager.INTERVAL_DAY, pendingIntent);
+//
+//    }
 }
