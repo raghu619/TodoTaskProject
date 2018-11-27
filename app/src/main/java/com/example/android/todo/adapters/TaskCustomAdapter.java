@@ -86,11 +86,12 @@ private  static final String LOG_TAG=TaskCustomAdapter.class.getSimpleName();
 
         }
 
-        holder.mCompleteTaskCheck.setOnCheckedChangeListener(null);
+
 
         holder.mCompleteTaskCheck.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
 
                 Cursor mcursor = getData(position + 1);
                 if(mcursor!=null && mcursor.getCount()!=0) {

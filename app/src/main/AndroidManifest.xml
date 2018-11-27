@@ -24,9 +24,10 @@
             android:name=".data.TaskContentProvider"
             android:authorities="com.example.android.todo" />
 
-        <activity android:name=".TaskDetailActivity"></activity>
+        <activity android:name=".TaskDetailActivity">
+       
 
-
+         </activity>
 
         <receiver android:name=".reminderservice.AlarmReceiver"
             android:enabled="false">
