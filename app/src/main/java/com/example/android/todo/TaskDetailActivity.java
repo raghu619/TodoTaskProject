@@ -45,7 +45,7 @@ public class TaskDetailActivity extends AppCompatActivity  implements LoaderMana
     LocalData localData;
     private TaskCommentAdapter mAdapter;
     private static final int TASK_LOADER_ID = 1;
-    private static final int DAILY_REMINDER_REQUEST_CODE=2;
+
     private int mHour,mMinute;
     private  String mtitle;
     final LoaderManager.LoaderCallbacks<Cursor> cursorLoaderCallbacks=this;
@@ -96,16 +96,6 @@ public class TaskDetailActivity extends AppCompatActivity  implements LoaderMana
                 TimePickerDialog timePickerDialog=new TimePickerDialog(TaskDetailActivity.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int i, int i1) {
-//                        String status="AM";
-//                        if(i>11){
-//                            status="PM";
-//                        }
-//                   }
-//
-//                        int hour=timePicker.getHour();
-//                        int minutes=timePicker.getMinute();
-//
-//                        setAlaram(hour,minutes,status);
 
                         localData.set_hour(i);
                         localData.set_min(i1);
@@ -114,7 +104,7 @@ public class TaskDetailActivity extends AppCompatActivity  implements LoaderMana
 
                         NotificationScheduler.setReminder(TaskDetailActivity.this, AlarmReceiver.class, localData.get_hour(), localData.get_min());
 
-
+                        Toast.makeText(getApplicationContext(),"Reminder is set",Toast.LENGTH_LONG).show();
 
 
 

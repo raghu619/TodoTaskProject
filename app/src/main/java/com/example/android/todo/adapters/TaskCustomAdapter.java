@@ -24,6 +24,7 @@ public class TaskCustomAdapter extends RecyclerView.Adapter<TaskCustomAdapter.Ta
 private  static final String LOG_TAG=TaskCustomAdapter.class.getSimpleName();
     private Cursor mCursor;
     private Context mContext;
+    private  int isChecked;
 
 
 
@@ -62,20 +63,90 @@ private  static final String LOG_TAG=TaskCustomAdapter.class.getSimpleName();
         mCursor.moveToPosition(position);
         int idIndex = mCursor.getColumnIndex(TaskContract.TaskEntry._ID);
         int descriptionIndex = mCursor.getColumnIndex(TaskContract.TaskEntry.COLUMN_DESCRIPTION);
-      //  int checkedtaskIndex=mCursor.getColumnIndex(TaskContract.TaskEntry.COLUMN_ISCOMPLETED);
+       int checkedtaskIndex=mCursor.getColumnIndex(TaskContract.TaskEntry.COLUMN_ISCOMPLETED);
         final int id = mCursor.getInt(idIndex);
+
 
         String description = mCursor.getString(descriptionIndex);
         holder.itemView.setTag(id);
         holder.taskDescriptionView.setText(description);
 
+
+        Cursor mcursor = getData( position+1);
+        if (mcursor != null && mcursor.getCount()!=0 ) {
+            mcursor.moveToFirst();
+
+           isChecked = mcursor.getInt(mcursor.getColumnIndex(TaskContract.TaskEntry.COLUMN_ISCOMPLETED));
+
+               if (isChecked == 1)
+                   holder.mCompleteTaskCheck.setChecked(true);
+               else
+                   holder.mCompleteTaskCheck.setChecked(false);
+
+
+        }
+
         holder.mCompleteTaskCheck.setOnCheckedChangeListener(null);
 
+        holder.mCompleteTaskCheck.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Cursor mcursor = getData(position + 1);
+                if(mcursor!=null && mcursor.getCount()!=0) {
+                    mcursor.moveToFirst();
+
+                    isChecked = mcursor.getInt(mcursor.getColumnIndex(TaskContract.TaskEntry.COLUMN_ISCOMPLETED));
+
+                }
+
+                if(isChecked==0)
+                {
+
+                    boolean isupdated= update(position+1,1);
+                    if(isupdated) {
+                        Cursor mcursor1 = getData(position + 1);
+                        if (mcursor1 != null && mcursor1.getCount() != 0) {
+                            mcursor1.moveToFirst();
+                           isChecked= mcursor1.getInt(mcursor1.getColumnIndex(TaskContract.TaskEntry.COLUMN_ISCOMPLETED));
+
+                        }
+                        Toast.makeText(mContext,"Marked as Completed",Toast.LENGTH_SHORT).show();
+
+                    }
+
+                }else {
+
+                    boolean isupdated = update(position + 1, 0);
+                    if(isupdated){
+                        Cursor mcursor1=getData(position+1);
+                        if(mcursor1!=null && mcursor1.getCount()!=0) {
+                            mcursor1.moveToFirst();
+                           isChecked = mcursor1.getInt(mcursor1.getColumnIndex(TaskContract.TaskEntry.COLUMN_ISCOMPLETED));
+
+                        }
 
 
 
 
-     //   Log.v(LOG_TAG,""+description+"  "+ischeckTask+" "+checkedtaskIndex);
+
+
+
+
+                    }
+
+                }
+
+
+
+            }
+        });
+
+
+
+
+
+
 
 
 
@@ -147,5 +218,29 @@ private  static final String LOG_TAG=TaskCustomAdapter.class.getSimpleName();
     public void SetOnItemClickListener(final OnItemClickListener mItemClickListener) {
         this.mItemClickListener = mItemClickListener;
     }
+
+     public Cursor getData(int id){
+         String stringId=Integer.toString(id);
+         Uri uri=TaskContract.TaskEntry.CONTENT_URI;
+         Cursor res=mContext.getContentResolver().query(uri,null,"_id=?",new String[]{stringId},null);
+         return  res;
+
+     }
+
+     public boolean update(Integer id,int val){
+
+         String stringId=Integer.toString(id);
+         Uri uri=TaskContract.TaskEntry.CONTENT_URI;
+         uri=uri.buildUpon().appendPath(stringId).build();
+         ContentValues values=new ContentValues();
+         values.put(TaskContract.TaskEntry.COLUMN_ISCOMPLETED,val);
+
+         mContext.getContentResolver().update(uri,values,null,null);
+
+         return true;
+
+
+     }
+
 
 }

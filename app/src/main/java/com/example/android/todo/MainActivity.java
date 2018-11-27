@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.android.todo.adapters.TaskCustomAdapter;
+import com.example.android.todo.data.CommentsDbHelper;
 import com.example.android.todo.data.TaskContract;
 
 public class MainActivity extends AppCompatActivity  implements LoaderManager.LoaderCallbacks<Cursor> ,TaskCustomAdapter.OnItemClickListener {
@@ -83,6 +84,8 @@ public class MainActivity extends AppCompatActivity  implements LoaderManager.Lo
                 Uri uri=TaskContract.TaskEntry.CONTENT_URI;
                 uri=uri.buildUpon().appendPath(stringId).build();
                 getContentResolver().delete(uri,null,null);
+                CommentsDbHelper commentsDbHelper=new CommentsDbHelper(getApplicationContext());
+                commentsDbHelper.getWritableDatabase().delete(TaskContract.CommentsEntry.TABLE_NAME,"commentid=?",new String[]{stringId});
                 getSupportLoaderManager().restartLoader(TASK_LOADER_ID,null, MainActivity.this);
 
 
